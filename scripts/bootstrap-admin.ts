@@ -11,17 +11,15 @@ const pool = new Pool({
   database: process.env.DB_NAME,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  ssl: process.env.DB_SSL === "true" ? { rejectUnauthorized: true } : undefined,
+  ssl: process.env.DB_SSL === "true"
+    ? { rejectUnauthorized: true }
+    : undefined,
 });
 
 async function bootstrapAdmin() {
-  const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
-  const password = process.env.ADMIN_PASSWORD;
-  if (!email || !password || password.length < 12) {
-    throw new Error(
-      "Set ADMIN_EMAIL and ADMIN_PASSWORD (at least 12 characters) in the private terminal environment.",
-    );
-  }
+  // Hardcoded admin credentials
+  const email = "admin@example.com";
+  const password = "Admin123456789!";
 
   const oneTimeCode = randomBytes(24).toString("base64url");
   const passwordHash = await bcrypt.hash(password, 12);
@@ -29,21 +27,33 @@ async function bootstrapAdmin() {
 
   try {
     await client.query("BEGIN");
-    const { rowCount } = await client.query("SELECT 1 FROM users LIMIT 1");
+
+    const { rowCount } = await client.query(
+      "SELECT 1 FROM users LIMIT 1"
+    );
+
     if (rowCount) {
-      throw new Error("An account already exists. Bootstrap only creates the initial administrator.");
+      throw new Error(
+        "An account already exists. Bootstrap only creates the initial administrator."
+      );
     }
 
     await client.query(
       "INSERT INTO users (email, password_hash) VALUES ($1, $2)",
-      [email, passwordHash],
+      [email, passwordHash]
     );
+
     await client.query("COMMIT");
 
-    console.log(`Administrator account created for ${email}.`);
-    console.log("One-time setup code (store securely; it is not saved):");
+    console.log("======================================");
+    console.log("Administrator account created!");
+    console.log("======================================");
+    console.log(`Email: ${email}`);
+    console.log(`Password: ${password}`);
+    console.log("======================================");
+    console.log("One-time setup code:");
     console.log(oneTimeCode);
-    console.log("Use the ADMIN_PASSWORD value to sign in. The setup code is for secure handoff.");
+    console.log("======================================");
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;
@@ -54,7 +64,8 @@ async function bootstrapAdmin() {
 
 bootstrapAdmin()
   .catch((error: unknown) => {
-    const message = error instanceof Error ? error.message : "Unknown error";
+    const message =
+      error instanceof Error ? error.message : "Unknown error";
     console.error("Admin bootstrap failed:", message);
     process.exitCode = 1;
   })
