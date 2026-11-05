@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { requireSession } from "@/lib/auth";
 import { listDepartments } from "@/lib/repositories/departments";
 import { getEmployee } from "@/lib/repositories/employees";
-import EmployeeForm from "../../../form";
+import EmployeeForm from "../../form";
 import { updateEmployee } from "./actions";
 
 type PageProps = { params: Promise<{ id: string }> };

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { requireSession } from "@/lib/auth";
 import { getDepartment } from "@/lib/repositories/departments";
-import DepartmentForm from "../../../form";
+import DepartmentForm from "../../form";
 import { updateDepartment } from "./actions";
 
 type PageProps = { params: Promise<{ id: string }> };
