@@ -14,9 +14,8 @@ function getEnv(name: string): string {
   return value;
 }
 
-export const pool =
-  globalForPg.pgPool ??
-  new Pool({
+function createPool() {
+  return new Pool({
     host: getEnv("DB_HOST"),
     port: Number(process.env.DB_PORT ?? 5432),
     database: getEnv("DB_NAME"),
@@ -27,11 +26,16 @@ export const pool =
         ? { rejectUnauthorized: true }
         : undefined,
     max: 10,
-    idleTimeoutMillis: 30_000,
-    connectionTimeoutMillis: 5_000,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 5000,
     application_name: "peopledesk-nextjs",
   });
+}
 
-if (process.env.NODE_ENV !== "production") {
-  globalForPg.pgPool = pool;
+export function getPool() {
+  if (!globalForPg.pgPool) {
+    globalForPg.pgPool = createPool();
+  }
+
+  return globalForPg.pgPool;
 }
