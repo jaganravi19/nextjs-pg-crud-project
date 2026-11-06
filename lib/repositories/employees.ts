@@ -1,4 +1,5 @@
 import { getPool } from "@/lib/db";
+import { ensureDatabaseInitialized } from "@/lib/repositories/db-init";
 import type { z } from "zod";
 import type { employeeSchema } from "@/lib/validators";
 
@@ -15,6 +16,8 @@ export async function listEmployees(options: {
   limit: number;
   offset: number;
 }) {
+  await ensureDatabaseInitialized();
+
   const pool = getPool();
   const pattern = `%${options.search}%`;
 
@@ -26,11 +29,13 @@ export async function listEmployees(options: {
         OR e.email ILIKE $2 OR e.job_title ILIKE $2)
       ORDER BY e.created_at DESC
       LIMIT $3 OFFSET $4`,
-    [options.search, pattern, options.limit, options.offset],
+    [options.search, pattern, options.limit, options.offset]
   );
 }
 
 export async function countEmployees(search: string) {
+  await ensureDatabaseInitialized();
+
   const pool = getPool();
   const pattern = `%${search}%`;
 
@@ -39,13 +44,15 @@ export async function countEmployees(search: string) {
        FROM employees
       WHERE ($1 = '' OR first_name ILIKE $2 OR last_name ILIKE $2
         OR email ILIKE $2 OR job_title ILIKE $2)`,
-    [search, pattern],
+    [search, pattern]
   );
 
   return Number(result.rows[0].total);
 }
 
 export async function getEmployee(id: number) {
+  await ensureDatabaseInitialized();
+
   const pool = getPool();
 
   const result = await pool.query(
@@ -53,13 +60,15 @@ export async function getEmployee(id: number) {
             department_id, hire_date, status
        FROM employees
       WHERE id = $1`,
-    [id],
+    [id]
   );
 
   return result.rows[0] ?? null;
 }
 
 export async function createEmployee(input: EmployeeInput) {
+  await ensureDatabaseInitialized();
+
   const pool = getPool();
 
   return pool.query(
@@ -75,11 +84,13 @@ export async function createEmployee(input: EmployeeInput) {
       input.departmentId || null,
       input.hireDate || null,
       input.status,
-    ],
+    ]
   );
 }
 
 export async function updateEmployee(id: number, input: EmployeeInput) {
+  await ensureDatabaseInitialized();
+
   const pool = getPool();
 
   return pool.query(
@@ -104,11 +115,17 @@ export async function updateEmployee(id: number, input: EmployeeInput) {
       input.hireDate || null,
       input.status,
       id,
-    ],
+    ]
   );
 }
 
 export async function deleteEmployee(id: number) {
+  await ensureDatabaseInitialized();
+
   const pool = getPool();
-  return pool.query("DELETE FROM employees WHERE id = $1", [id]);
+
+  return pool.query(
+    "DELETE FROM employees WHERE id = $1",
+    [id]
+  );
 }

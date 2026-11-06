@@ -6,19 +6,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "db:migrate": "tsx scripts/migrate.ts",
-    "admin:bootstrap": "tsx scripts/bootstrap-admin.ts"
+    "lint": "next lint"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.7",
     "jose": "^5.9.6",
     "next": "^15.1.6",
     "pg": "^8.13.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "zod": "^3.24.1",
-    "dotenv": "^16.4.7"
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
