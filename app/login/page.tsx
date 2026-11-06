@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getPool } from "@/lib/db";
+import { ensureDatabaseInitialized } from "@/lib/repositories/db-init";
 import { login } from "./actions";
 
 export default async function Login({
@@ -7,11 +8,16 @@ export default async function Login({
 }: {
   searchParams: Promise<{ error?: string }>;
 }) {
+  // Ensure the database and tables exist before querying.
+  await ensureDatabaseInitialized();
+
   const pool = getPool();
 
-  const result = await pool.query("SELECT COUNT(*)::int AS count FROM users");
+  const result = await pool.query(
+    "SELECT COUNT(*)::int AS count FROM users"
+  );
 
-  if (result.rows[0].count === 0) {
+  if (Number(result.rows[0].count) === 0) {
     redirect("/setup");
   }
 
@@ -49,7 +55,7 @@ export default async function Login({
             />
           </label>
 
-          <button>Sign in</button>
+          <button type="submit">Sign in</button>
         </form>
       </section>
     </main>
